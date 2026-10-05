@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dijital Kartvizit Oluşturucu</title>
+<meta name="description" content="Bilgilerini gir, premium dijital kartvizitini oluştur ve tek dosya HTML olarak indir. GitHub Pages'e hazır.">
+<meta name="theme-color" content="#0b1220">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b1220'/%3E%3Ctext x='32' y='45' text-anchor='middle' font-size='34' font-weight='800' fill='%23ffffff' font-family='Arial'%3E%2B%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#eef1f6;--panel:#ffffff;--panel2:#f6f8fb;--ink:#17263b;--muted:#5d6b80;--faint:#8793a5;
+  --line:#dde3ec;--line2:#e9eef4;--brand:#3b5bdb;--brand-ink:#2942a8;--chip:#eef2f8;--ok:#1f8a5b;
+  --field:#ffffff;--fieldline:#cfd8e4;
+  --shadow:0 1px 2px #16284708,0 12px 30px -16px #16284730;
+  --sans:'Manrope',system-ui,Arial,sans-serif;--mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1220;--panel:#121b2b;--panel2:#0f1826;--ink:#e7edf6;--muted:#9aa8bd;--faint:#6f7e93;
+  --line:#243244;--line2:#1d2938;--brand:#7f9bff;--brand-ink:#9fb4ff;--chip:#18222f;
+  --field:#0e1725;--fieldline:#2b3a4f;--shadow:0 1px 2px #0006,0 16px 40px -18px #0009;
+}}
+:root[data-theme="dark"]{
+  --bg:#0b1220;--panel:#121b2b;--panel2:#0f1826;--ink:#e7edf6;--muted:#9aa8bd;--faint:#6f7e93;
+  --line:#243244;--line2:#1d2938;--brand:#7f9bff;--brand-ink:#9fb4ff;--chip:#18222f;
+  --field:#0e1725;--fieldline:#2b3a4f;--shadow:0 1px 2px #0006,0 16px 40px -18px #0009;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:30px 20px 70px}
+header.top .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--brand);margin:0 0 8px}
+header.top h1{font-size:clamp(1.55rem,3.2vw,2.1rem);font-weight:800;letter-spacing:-.03em;margin:0}
+header.top p{color:var(--muted);font-size:14.5px;margin:10px 0 0;max-width:68ch}
+header.top code{font-family:var(--mono);font-size:12.5px;background:var(--chip);padding:2px 7px;border-radius:6px;color:var(--ink)}
+
+.app{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,460px);gap:26px;margin-top:26px;align-items:start}
+@media(max-width:920px){.app{grid-template-columns:1fr}}
+
+.editor{display:flex;flex-direction:column;gap:18px}
+.group{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 18px 20px;box-shadow:var(--shadow)}
+.group h2{display:flex;align-items:center;gap:9px;font-size:12px;font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin:0 0 15px;font-weight:500}
+.group h2 b{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--chip);color:var(--brand);font-family:var(--sans);font-weight:800;font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media(max-width:460px){.grid2{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:12.5px;font-weight:600;color:var(--muted)}
+label .opt{font-weight:500;color:var(--faint)}
+input[type=text],input[type=tel],input[type=email],input[type=url],select{
+  font:inherit;font-size:14px;color:var(--ink);background:var(--field);border:1px solid var(--fieldline);
+  border-radius:10px;padding:10px 12px;width:100%;min-width:0}
+input:focus,select:focus{outline:2px solid var(--brand);outline-offset:1px;border-color:var(--brand)}
+.row-inline{display:flex;gap:10px;align-items:center}
+input[type=color]{inline-size:48px;block-size:40px;padding:3px;border:1px solid var(--fieldline);border-radius:10px;background:var(--field);cursor:pointer}
+.swatches{display:flex;gap:7px;flex-wrap:wrap}
+.swatches button{width:26px;height:26px;border-radius:7px;border:2px solid #0000;cursor:pointer;padding:0}
+.swatches button[aria-pressed=true]{border-color:var(--ink);box-shadow:0 0 0 2px var(--panel) inset}
+.file{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.filebtn{font:inherit;font-size:13.5px;font-weight:600;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:9px 14px;cursor:pointer}
+.filebtn:hover{border-color:var(--brand)}
+.logohint{font-size:12px;color:var(--faint)}
+.logoprev{width:40px;height:40px;border-radius:8px;object-fit:contain;background:#fff;border:1px solid var(--line);padding:3px;display:none}
+.clearlogo{font:inherit;font-size:12.5px;color:var(--brand-ink);background:none;border:0;cursor:pointer;text-decoration:underline;display:none}
+.hint{font-size:12px;color:var(--faint);margin:3px 0 0}
+
+.side{position:sticky;top:18px;display:flex;flex-direction:column;gap:14px}
+.previewcard{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;box-shadow:var(--shadow)}
+.pvtop{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 10px}
+.pvtop .ttl{font-size:12px;font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+.seg{display:inline-flex;background:var(--chip);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px}
+.seg button{font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:none;border:0;cursor:pointer;padding:5px 11px;border-radius:6px}
+.seg button[aria-pressed=true]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px #0000001f}
+.preview{position:relative;overflow:hidden;border-radius:11px;background:#e9edf3;border:1px solid var(--line)}
+.preview iframe{border:0;display:block;transform-origin:top left;background:#eef1f6}
+
+.actions{display:flex;flex-direction:column;gap:9px}
+.btn{font:inherit;font-weight:700;font-size:14.5px;border-radius:12px;padding:13px 16px;cursor:pointer;border:1px solid transparent;display:flex;align-items:center;justify-content:center;gap:9px;width:100%}
+.btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand-ink));color:#fff;box-shadow:0 6px 16px -6px var(--brand)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.ghost{background:var(--panel);border-color:var(--fieldline);color:var(--ink)}
+.btn.ghost:hover{border-color:var(--brand)}
+.btn:active{transform:scale(.99)}
+.status{min-height:18px;font-family:var(--mono);font-size:11.5px;letter-spacing:.03em;color:var(--ok);text-align:center}
+
+.howto{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 16px;box-shadow:var(--shadow)}
+.howto summary{cursor:pointer;font-size:13.5px;font-weight:700;padding:13px 2px;list-style:none;display:flex;align-items:center;gap:9px}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary .chev{margin-left:auto;transition:transform .2s;color:var(--faint)}
+.howto[open] summary .chev{transform:rotate(90deg)}
+.howto ol{margin:0 0 14px;padding-left:20px;color:var(--muted);font-size:13.5px;line-height:1.7}
+.howto li{margin:5px 0}.howto code{font-family:var(--mono);font-size:12px;background:var(--chip);padding:1px 6px;border-radius:5px;color:var(--ink)}
+.howto a{color:var(--brand-ink);font-weight:600}
+</style></head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Dijital Kartvizit</p>
+    <h1>Kartvizit Oluşturucu</h1>
+    <p>Bilgilerini doldur, sağda canlı önizlemeyi gör, sonra <b>tek dosya <code>index.html</code></b> indir. Kendi GitHub Pages'ine (ya da herhangi bir yere) koyunca kartın yayında olur. Logo gömülür, QR kart linkinden otomatik üretilir.</p>
+  </header>
+
+  <div class="app">
+    <!-- ================= EDITOR ================= -->
+    <form class="editor" id="form" autocomplete="off">
+      <section class="group">
+        <h2><b>1</b> Kimlik</h2>
+        <div class="grid2">
+          <div class="field"><label for="first">Ad</label><input type="text" id="first" value="Ada"></div>
+          <div class="field"><label for="last">Soyad</label><input type="text" id="last" value="YILMAZ"></div>
+          <div class="field"><label for="monogram">Köşe monogramı <span class="opt">(sol üst)</span></label><input type="text" id="monogram" value="AY" maxlength="4"></div>
+          <div class="field"><label for="title">Unvan</label><input type="text" id="title" value="Senior Researcher"></div>
+          <div class="field full"><label for="eyebrow">Üst etiket <span class="opt">(ops.)</span></label><input type="text" id="eyebrow" value="Research · Engineering"></div>
+          <div class="field full"><label for="group">Grup / Departman <span class="opt">(ops.)</span></label><input type="text" id="group" value="Advanced Systems Group"></div>
+          <div class="field"><label for="inst1">Kurum satırı 1</label><input type="text" id="inst1" value="Space Technologies"></div>
+          <div class="field"><label for="inst2">Kurum satırı 2 <span class="opt">(ops.)</span></label><input type="text" id="inst2" value="Research Institute"></div>
+        </div>
+        <div class="field full" style="margin-top:13px">
+          <label>Logo <span class="opt">(ops. — boşsa monogram kullanılır)</span></label>
+          <div class="file">
+            <button type="button" class="filebtn" id="logobtn">Logo seç…</button>
+            <input type="file" id="logo" accept="image/*" hidden>
+            <img class="logoprev" id="logoprev" alt="">
+            <button type="button" class="clearlogo" id="logoclear">Kaldır</button>
+            <span class="logohint" id="logohint">PNG / JPG / SVG · otomatik küçültülür</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2><b>2</b> İletişim</h2>
+        <div class="grid2">
+          <div class="field"><label for="phone">Telefon <span class="opt">(ops.)</span></label><input type="tel" id="phone" value="+90 312 000 00 00"></div>
+          <div class="field"><label for="email">E-posta <span class="opt">(ops.)</span></label><input type="email" id="email" value="ada@kurum.gov.tr"></div>
+          <div class="field"><label for="lival">LinkedIn görünen <span class="opt">(ops.)</span></label><input type="text" id="lival" value="Ada Yılmaz"></div>
+          <div class="field"><label for="liurl">LinkedIn linki</label><input type="url" id="liurl" value="https://www.linkedin.com/in/"></div>
+          <div class="field"><label for="webval">Web görünen <span class="opt">(ops.)</span></label><input type="text" id="webval" value="kurum.gov.tr"></div>
+          <div class="field"><label for="weburl">Web linki</label><input type="url" id="weburl" value="https://kurum.gov.tr"></div>
+          <div class="field"><label for="weblabel">Web etiketi</label><input type="text" id="weblabel" value=""></div>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2><b>3</b> Konum</h2>
+        <div class="grid2">
+          <div class="field"><label for="place">Yer <span class="opt">(ops.)</span></label><input type="text" id="place" value="ANKARA, TÜRKİYE"></div>
+          <div class="field"><label for="geo">Koordinat <span class="opt">(ops.)</span></label><input type="text" id="geo" value="39.925°N · 32.866°E"></div>
+          <div class="field"><label for="node1">Sağ not — üst <span class="opt">(ops.)</span></label><input type="text" id="node1" value=""></div>
+          <div class="field"><label for="node2">Sağ not — alt <span class="opt">(ops.)</span></label><input type="text" id="node2" value=""></div>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2><b>4</b> Görünüm</h2>
+        <div class="grid2">
+          <div class="field"><label for="lang">Arayüz dili</label>
+            <select id="lang"><option value="en">English</option><option value="tr">Türkçe</option></select></div>
+          <div class="field"><label for="theme">Panel teması</label>
+            <select id="theme"><option value="navy">Deep Navy</option><option value="charcoal">Charcoal</option><option value="plum">Plum</option><option value="forest">Forest</option></select></div>
+          <div class="field full"><label>Aksan rengi</label>
+            <div class="row-inline">
+              <input type="color" id="accent" value="#d8324b">
+              <div class="swatches" id="swatches"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="group">
+        <h2><b>5</b> Paylaşım & QR</h2>
+        <div class="field full">
+          <label for="cardurl">Kartın yayınlanacağı link <span class="opt">(QR + “bağlantıyı kopyala” için)</span></label>
+          <input type="url" id="cardurl" value="https://kullaniciadi.github.io">
+          <p class="hint">Boş bırakırsan QR bölümü karttan çıkar. Kendi GitHub Pages adresini yaz (ör. <code>https://kullaniciadi.github.io</code>).</p>
+        </div>
+      </section>
+    </form>
+
+    <!-- ================= PREVIEW ================= -->
+    <div class="side">
+      <div class="previewcard">
+        <div class="pvtop">
+          <span class="ttl">Canlı önizleme</span>
+          <div class="seg" role="group" aria-label="Önizleme boyutu">
+            <button type="button" id="mMob" aria-pressed="true">Mobil</button>
+            <button type="button" id="mDesk" aria-pressed="false">Masaüstü</button>
+          </div>
+        </div>
+        <div class="preview" id="pv"><iframe id="frame" title="Kart önizlemesi"></iframe></div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn primary" id="download">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-5-5 5 5 5-5M5 21h14"/></svg>
+          index.html indir
+        </button>
+        <button type="button" class="btn ghost" id="copy">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          HTML'i kopyala
+        </button>
+        <p class="status" id="status"></p>
+      </div>
+
+      <details class="howto">
+        <summary>GitHub Pages'e nasıl koyulur? <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg></summary>
+        <ol>
+          <li><a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a> → repo adı tam olarak <code>kullanıcıadın.github.io</code>.</li>
+          <li><b>index.html indir</b> butonuyla dosyanı indir.</li>
+          <li>Repo'da <b>Add file → Upload files</b> ile <code>index.html</code>'i yükle, <b>Commit</b>.</li>
+          <li>1-2 dk sonra kartın <code>https://kullanıcıadın.github.io</code> adresinde yayında.</li>
+          <li>İpucu: Yukarıdaki “Kartın linki” alanına bu adresi yazarsan QR doğru çalışır.</li>
+        </ol>
+      </details>
+    </div>
+  </div>
+</div>
+
+<script type="text/plain" id="cardcss">:root{
+  --ink:#0a1422;--ink2:#132540;--glow:#24406a;
+  --accent:#d8324b;--accent-soft:#ff5f78;
+  --paper:#f6f8fc;--paper2:#eef2f8;
+  --text-d:#eaf0f9;--muted-d:#9fb2cd;--steel:#718aad;
+  --text:#152539;--muted:#5c6c84;
+  --line-d:rgba(255,255,255,.12);--line:#e3e9f1;--tile:#f3f6fb;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:'Manrope',system-ui,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{font-family:var(--sans);color:var(--text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{margin:0;min-height:100svh;background:
+  radial-gradient(ellipse 60% 50% at 15% -5%,#ffffff 0,transparent 60%),
+  radial-gradient(ellipse 70% 60% at 95% 105%,#dde6f1 0,transparent 55%),#e7ecf3}
+main{width:min(940px,100%);margin:auto;padding:60px 24px 34px}
+a{text-decoration:none;color:inherit}
+button{font:inherit;cursor:pointer;border:0;background:none;-webkit-tap-highlight-color:transparent}
+
+.masthead{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.mark{display:flex;align-items:baseline;gap:5px;font-weight:800;font-size:21px;letter-spacing:-.04em;color:#152236}
+.mark i{width:6px;height:6px;background:var(--accent);border-radius:2px;display:inline-block;transform:translateY(-1px)}
+.tagline{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.28em;color:#6b7a90;text-transform:uppercase}
+
+.card{position:relative;display:grid;grid-template-columns:1.06fr 1fr;border-radius:22px;overflow:hidden;
+  background:#fff;isolation:isolate;
+  box-shadow:0 1px 1px #0d1f3a12,0 10px 24px -12px #0d1f3a2e,0 34px 60px -26px #0d1f3a3d,0 0 0 1px #0d1f3a0f}
+
+/* ---------- identity (deep space) ---------- */
+.identity{position:relative;display:flex;flex-direction:column;padding:40px 36px;color:var(--text-d);overflow:hidden;
+  background:
+    radial-gradient(130% 90% at 2% -10%,var(--glow) 0,transparent 42%),
+    radial-gradient(120% 120% at 110% 115%,var(--glow2) 0,transparent 46%),
+    linear-gradient(158deg,var(--ink2) 0,var(--ink) 72%)}
+/* starfield + grain */
+.identity::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;opacity:.85;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='24' cy='40' r='1' opacity='.9'/%3E%3Ccircle cx='140' cy='22' r='.8' opacity='.5'/%3E%3Ccircle cx='250' cy='60' r='1.1' opacity='.7'/%3E%3Ccircle cx='60' cy='120' r='.7' opacity='.45'/%3E%3Ccircle cx='200' cy='150' r='.9' opacity='.6'/%3E%3Ccircle cx='285' cy='200' r='.7' opacity='.4'/%3E%3Ccircle cx='110' cy='210' r='1' opacity='.55'/%3E%3Ccircle cx='30' cy='255' r='.8' opacity='.5'/%3E%3Ccircle cx='170' cy='275' r='.7' opacity='.4'/%3E%3Ccircle cx='235' cy='255' r='.9' opacity='.6'/%3E%3Ccircle cx='95' cy='70' r='.6' opacity='.35'/%3E%3Ccircle cx='265' cy='120' r='.6' opacity='.4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:300px 300px}
+.identity::after{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;mix-blend-mode:overlay;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.orbit{position:absolute;right:-70px;bottom:-80px;width:360px;height:360px;z-index:0;opacity:.5;pointer-events:none}
+.accent-line{position:absolute;top:0;left:0;right:0;height:2px;z-index:2;
+  background:linear-gradient(90deg,transparent,var(--accent) 22%,var(--accent-soft) 50%,var(--accent) 78%,transparent)}
+.identity>*:not(.accent-line):not(.orbit){position:relative;z-index:1}
+
+.brand{display:flex;align-items:center;gap:20px}
+.logo{flex:0 0 78px;background:#fff;padding:11px 12px;border-radius:9px;display:block;
+  box-shadow:0 6px 18px #0004,0 0 0 1px #ffffff26,inset 0 0 0 1px #00000008}
+.logo img{display:block;width:100%;height:auto}
+.institute{margin:0}
+.institute b{display:block;font-size:14.5px;font-weight:700;letter-spacing:-.01em;color:#eef3fb}
+.institute span{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.24em;color:var(--steel);margin-top:7px;text-transform:uppercase}
+
+.name{margin:54px 0 auto}
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--accent-soft);margin:0 0 16px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--accent-soft);opacity:.8}
+.name h1{font-size:clamp(2.5rem,5.1vw,3.4rem);font-weight:800;letter-spacing:-.045em;line-height:1.02;margin:0;text-wrap:balance}
+.name h1 .first{font-weight:400;color:#dbe6f5}
+.period{color:var(--accent);text-shadow:0 0 18px #ff4d6a66}
+.title{font-size:18.5px;font-weight:600;letter-spacing:-.015em;margin:20px 0 8px}
+.group{font-size:13.5px;line-height:1.7;color:var(--muted-d);max-width:300px;margin:0}
+
+.coords{margin-top:38px;padding-top:20px;border-top:1px solid var(--line-d);
+  display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.coords .place{font-size:12px;font-weight:600;letter-spacing:.14em}
+.coords .geo{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--steel);margin-top:7px}
+.coords .node{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted-d);text-align:right}
+
+/* ---------- contact ---------- */
+.contact{padding:34px 28px;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(160deg,#fff,#f4f7fb)}
+.save{position:relative;display:flex;align-items:center;gap:12px;overflow:hidden;
+  background:linear-gradient(135deg,#223c5b,#101f34);color:#fff;min-height:58px;padding:0 20px;border-radius:12px;
+  font-size:16px;font-weight:700;letter-spacing:-.01em;
+  box-shadow:0 6px 16px #10213a2e,inset 0 1px 0 #ffffff24,inset 0 0 0 1px #ffffff0f}
+.save .ico{display:flex}
+.save .vcard{margin-left:auto;font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.14em;color:#b9c7da;
+  border:1px solid #ffffff2b;border-radius:6px;padding:4px 8px}
+.save::before{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;
+  background:linear-gradient(100deg,transparent,#ffffff38,transparent);transform:skewX(-18deg)}
+
+.links{margin:20px 0 18px;display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:6px}
+.row+.row{border-top:1px solid var(--line)}
+.row-main{flex:1;min-width:0;display:flex;align-items:center;gap:14px;padding:15px 8px;margin:0 -2px 0 -8px;border-radius:10px}
+.tile{flex:0 0 40px;height:40px;border-radius:11px;display:grid;place-items:center;color:#3d546f;
+  background:var(--tile);border:1px solid #e4ebf3}
+.meta{min-width:0}
+.lbl{display:block;font-family:var(--mono);font-size:10.5px;font-weight:500;letter-spacing:.16em;color:#7a879c;margin-bottom:3px;text-transform:uppercase}
+.val{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em;color:#1b2b41;overflow-wrap:anywhere;line-height:1.35}
+.go{flex:0 0 auto;color:#a9b6c8;padding-right:6px;display:flex;opacity:0;transform:translateX(-4px)}
+.cp{flex:0 0 38px;height:38px;border-radius:9px;display:grid;place-items:center;color:#8794a8;
+  border:1px solid transparent}
+.cp:hover{background:#eef3f9;color:#25527e}
+
+.share{display:flex;align-items:center;justify-content:center;gap:10px;min-height:50px;width:100%;
+  background:#fff;border:1px solid #cdd8e5;color:#243b55;border-radius:11px;font-size:14px;font-weight:600;letter-spacing:-.01em;
+  box-shadow:0 1px 2px #162c4008}
+.share .ico{display:flex}
+
+footer{display:flex;justify-content:space-between;align-items:center;margin-top:22px}
+footer .nm{font-size:12px;font-weight:600;color:#56657b}
+footer .st{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:#7c8aa0;text-transform:uppercase}
+
+a:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:8px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,16px);z-index:50;
+  display:flex;align-items:center;gap:9px;background:#0d1d33;color:#fff;
+  font-size:13px;font-weight:600;padding:11px 16px;border-radius:11px;
+  box-shadow:0 14px 34px #0a14225c,inset 0 0 0 1px #ffffff1a;opacity:0;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast svg{color:#5fd39a}
+
+dialog{width:min(380px,calc(100% - 32px));padding:34px 28px 22px;border:1px solid #ffffff;border-radius:22px;text-align:center;color:#142238;
+  box-shadow:0 30px 90px #0a142266}
+dialog::backdrop{background:#071021c2;backdrop-filter:blur(8px)}
+.d-eye{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin:0}
+dialog h2{font-size:26px;letter-spacing:-.03em;margin:12px 0 6px}
+dialog p{font-size:13.5px;line-height:1.6;color:#64728a;margin:0 0 14px}
+dialog img{display:block;width:230px;max-width:100%;height:auto;margin:6px auto 16px;border-radius:12px}
+.d-close{position:absolute;right:10px;top:8px;width:42px;height:42px;font-size:26px;color:#5c6878}
+.copy{display:block;width:100%;min-height:46px;margin-top:4px;background:#fff;border:1px solid #cdd8e5;color:#243b55;border-radius:11px;font-weight:600;font-size:13.5px}
+#status{min-height:18px;margin:10px 0 0;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:#5c6b82}
+
+@media(hover:hover){
+  .row-main:hover{background:#eef3f9}
+  .row:hover .tile{background:var(--ink);color:#fff;border-color:transparent;box-shadow:0 4px 12px #10213a33}
+  .row-main:hover .go{opacity:1;transform:translateX(0)}
+  .save:hover{filter:brightness(1.08);box-shadow:0 10px 22px #10213a3d,inset 0 1px 0 #ffffff24}
+  .share:hover,.copy:hover{background:#eef3f9;border-color:#b2c1d4}
+  .logo:hover{box-shadow:0 8px 24px #0005,0 0 0 1px #ffffff40}
+}
+.save:active,.share:active,.copy:active,.cp:active{transform:scale(.98)}
+
+@media(prefers-reduced-motion:no-preference){
+  a,button,.tile,.go,.save{transition:background .2s,color .2s,box-shadow .2s,border-color .2s,transform .2s,filter .2s,opacity .2s}
+  .card{animation:rise .6s cubic-bezier(.2,.7,.2,1) both}
+  .row,.save,.share{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
+  .save{animation-delay:.05s}
+  .row:nth-child(1){animation-delay:.12s}.row:nth-child(2){animation-delay:.18s}
+  .row:nth-child(3){animation-delay:.24s}.row:nth-child(4){animation-delay:.3s}
+  .share{animation-delay:.36s}
+  .save::before{animation:sheen 4.5s ease-in-out 1s infinite}
+  .twinkle{animation:tw 3.4s ease-in-out infinite}
+  .twinkle.b{animation-duration:4.6s;animation-delay:.8s}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes sheen{0%,72%{left:-60%}88%,100%{left:130%}}
+  @keyframes tw{0%,100%{opacity:.25}50%{opacity:.9}}
+}
+
+@media(max-width:700px){
+  main{max-width:470px;padding:26px 18px}
+  .card{grid-template-columns:1fr;border-radius:18px}
+  .identity{padding:30px 26px}
+  .name{margin:40px 0 0}
+  .coords{margin-top:30px}
+  .contact{padding:24px 22px}
+  .go{display:none}
+  .cp{opacity:1}
+  .eyebrow{font-size:9.5px;letter-spacing:.1em;white-space:nowrap}
+  .eyebrow::before{width:16px}
+}</script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CARD_CSS=$('cardcss').textContent;
+
+const STR={
+  en:{tag:'Digital Business Card',add:'Add to contacts',qr:'Share via QR code',foot:"Let's stay in touch",
+      lPhone:'Phone',lEmail:'Email',lLinked:'LinkedIn',lWeb:'Website',
+      dCard:'Contact Card',scan:'Scan with your camera to open my business card.',dl:'Download QR code',
+      copyLink:'Copy link',copied:'Copied',linkCopied:'Link copied',close:'Close'},
+  tr:{tag:'Dijital Kartvizit',add:'Rehbere ekle',qr:'QR kod ile paylaş',foot:'İletişimde kalalım',
+      lPhone:'Telefon',lEmail:'E-posta',lLinked:'LinkedIn',lWeb:'Web Sitesi',
+      dCard:'İletişim Kartı',scan:'Kartımı açmak için kameranızla okutun.',dl:'QR kodu indir',
+      copyLink:'Bağlantıyı kopyala',copied:'Kopyalandı',linkCopied:'Bağlantı kopyalandı',close:'Kapat'}
+};
+const THEMES={
+  navy:{ink:'#0a1422',ink2:'#132540',glow:'#24406a',glow2:'#15335e'},
+  charcoal:{ink:'#0f1012',ink2:'#1d2026',glow:'#3a4049',glow2:'#2b3340'},
+  plum:{ink:'#130a1b',ink2:'#261634',glow:'#4d2d63',glow2:'#3a2152'},
+  forest:{ink:'#07140f',ink2:'#10271d',glow:'#1f4a36',glow2:'#15402f'}
+};
+const SWATCHES=['#d8324b','#e8590c','#f08c00','#2f9e44','#0ca678','#1c7ed6','#4263eb','#7048e8','#ae3ec9','#0b1220'];
+
+let logoDataUri='';
+
+function lighten(hex,amt){ // mix with white
+  const m=hex.replace('#','');const n=m.length===3?m.split('').map(c=>c+c).join(''):m;
+  const r=parseInt(n.slice(0,2),16),g=parseInt(n.slice(2,4),16),b=parseInt(n.slice(4,6),16);
+  const mix=(c)=>Math.round(c+(255-c)*amt);
+  return '#'+[mix(r),mix(g),mix(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
+}
+function makeQR(text){
+  const qr=qrcode(0,'M');qr.addData(text);qr.make();
+  const n=qr.getModuleCount(),cell=6,margin=4,size=(n+margin*2)*cell;
+  const c=document.createElement('canvas');c.width=c.height=size;const x=c.getContext('2d');
+  x.fillStyle='#ffffff';x.fillRect(0,0,size,size);x.fillStyle='#0a1422';
+  for(let r=0;r<n;r++)for(let col=0;col<n;col++)if(qr.isDark(r,col))x.fillRect((col+margin)*cell,(r+margin)*cell,cell,cell);
+  return c.toDataURL('image/png');
+}
+function vcard(d){
+  const L=['BEGIN:VCARD','VERSION:3.0',
+    'N:'+(d.last||'')+';'+(d.first||''),
+    'FN:'+((d.first||'')+' '+(d.last||'')).trim(),
+    d.title?'TITLE:'+d.title:'',
+    (d.inst1||d.inst2)?'ORG:'+[d.inst1,d.inst2].filter(Boolean).join(' '):'',
+    d.phone?'TEL;TYPE=WORK,VOICE:'+d.phone.replace(/\s+/g,''):'',
+    d.email?'EMAIL;TYPE=WORK:'+d.email:'',
+    d.weburl?'URL:'+d.weburl:'',
+    'END:VCARD'].filter(Boolean);
+  return 'data:text/vcard;charset=utf-8,'+encodeURIComponent(L.join('\r\n'));
+}
+const ICON={
+  add:'<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>',
+  phone:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .3 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.4 1.8.6 2.8.7a2 2 0 0 1 1.8 2.1Z"/></svg>',
+  mail:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>',
+  li:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7.5 10v7m4-7v7m0-4a3 3 0 0 1 6 0v4"/><circle cx="7.5" cy="7" r=".7" fill="currentColor"/></svg>',
+  web:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>',
+  cp:'<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>',
+  go:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7m0 0H8m9 0v9"/></svg>',
+  qr:'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 15h3v3h3v3h-6v-3m6-3v-3M12 3v4m0 5H3m9 3v6"/></svg>'
+};
+
+function readData(){
+  return {first:$('first').value.trim(),last:$('last').value.trim(),monogram:$('monogram').value.trim(),
+    title:$('title').value.trim(),eyebrow:$('eyebrow').value.trim(),group:$('group').value.trim(),
+    inst1:$('inst1').value.trim(),inst2:$('inst2').value.trim(),
+    phone:$('phone').value.trim(),email:$('email').value.trim(),
+    lival:$('lival').value.trim(),liurl:$('liurl').value.trim(),
+    webval:$('webval').value.trim(),weburl:$('weburl').value.trim(),weblabel:$('weblabel').value.trim(),
+    place:$('place').value.trim(),geo:$('geo').value.trim(),node1:$('node1').value.trim(),node2:$('node2').value.trim(),
+    lang:$('lang').value,theme:$('theme').value,accent:$('accent').value,cardurl:$('cardurl').value.trim(),
+    logo:logoDataUri};
+}
+
+function row(href,icon,label,val,opts){
+  opts=opts||{};
+  const tgt=opts.blank?' target="_blank" rel="noopener noreferrer"':'';
+  const trail=opts.copy
+    ? '<button class="cp" data-copy="'+esc(opts.copy)+'" aria-label="'+esc(label)+'">'+ICON.cp+'</button>'
+    : '<span class="go" aria-hidden="true">'+ICON.go+'</span>';
+  return '<div class="row"><a class="row-main" href="'+esc(href)+'"'+tgt+'>'+
+    '<span class="tile" aria-hidden="true">'+icon+'</span>'+
+    '<span class="meta"><span class="lbl">'+esc(label)+'</span><span class="val">'+esc(val)+'</span></span>'+
+    '</a>'+trail+'</div>';
+}
+
+function buildCard(d){
+  const t=STR[d.lang]||STR.en;
+  const th=THEMES[d.theme]||THEMES.navy;
+  const accent=d.accent||'#d8324b';const soft=lighten(accent,.32);
+  const full=((d.first||'')+' '+(d.last||'')).trim()||'Your Name';
+  const weblabel=d.weblabel||t.lWeb;
+  const logo = d.logo
+    ? '<img src="'+d.logo+'" alt="'+esc(d.inst1||full)+'">'
+    : '<span class="mono">'+esc(d.monogram||((d.first||'')[0]||'')+((d.last||'')[0]||'')||'•')+'</span>';
+
+  // contact rows (only if value present)
+  let rows='';
+  if(d.phone) rows+=row('tel:'+d.phone.replace(/\s+/g,''),ICON.phone,t.lPhone,d.phone,{copy:d.phone});
+  if(d.email) rows+=row('mailto:'+d.email,ICON.mail,t.lEmail,d.email,{copy:d.email});
+  if(d.lival||d.liurl) rows+=row(d.liurl||'#',ICON.li,t.lLinked,d.lival||d.liurl,{blank:true});
+  if(d.webval||d.weburl) rows+=row(d.weburl||'#',ICON.web,weblabel,d.webval||d.weburl,{blank:true});
+
+  const eyebrow=d.eyebrow?'<p class="eyebrow">'+esc(d.eyebrow)+'</p>':'';
+  const group=d.group?'<p class="group">'+esc(d.group)+'</p>':'';
+  const inst2=d.inst2?'<span>'+esc(d.inst2)+'</span>':'';
+  const first=d.first?'<span class="first">'+esc(d.first)+'</span> ':'';
+  const last=esc(d.last||'');
+  const node=(d.node1||d.node2)?'<div class="node">'+esc(d.node1||'')+(d.node2?'<br>'+esc(d.node2):'')+'</div>':'';
+  const place=d.place?'<div class="place">'+esc(d.place)+'</div>':'';
+  const geo=d.geo?'<div class="geo">'+esc(d.geo)+'</div>':'';
+  const coords=(place||geo||node)?'<div class="coords"><div>'+place+geo+'</div>'+node+'</div>':'';
+
+  // QR / share (only if cardurl)
+  let share='',dialog='';
+  if(d.cardurl){
+    let qrsrc='';try{qrsrc=makeQR(d.cardurl);}catch(e){}
+    share='<button class="share" id="showQR"><span class="ico" aria-hidden="true">'+ICON.qr+'</span> '+esc(t.qr)+'</button>';
+    dialog='<dialog id="qrDialog"><button class="d-close" aria-label="'+esc(t.close)+'">×</button>'+
+      '<p class="d-eye">'+esc(t.dCard)+'</p><h2>'+esc(full)+'</h2><p>'+esc(t.scan)+'</p>'+
+      (qrsrc?'<img src="'+qrsrc+'" width="230" height="230" alt="QR">':'')+
+      (qrsrc?'<a class="copy" href="'+qrsrc+'" download="qr.png">'+esc(t.dl)+'</a>':'')+
+      '<button class="copy" id="copy">'+esc(t.copyLink)+'</button><p id="status" role="status"></p></dialog>';
+  }
+
+  const vtag=' <span class="vcard">vCard</span>';
+  const save='<a class="save" href="'+vcard(d)+'" download="'+esc((full||'card').replace(/\s+/g,'-'))+'.vcf">'+
+    '<span class="ico" aria-hidden="true">'+ICON.add+'</span> '+esc(t.add)+vtag+'</a>';
+
+  const orbit='<svg class="orbit" viewBox="0 0 360 360" fill="none" aria-hidden="true">'+
+    '<ellipse cx="180" cy="180" rx="150" ry="150" stroke="#5b7aa6" stroke-width="1" opacity=".32"/>'+
+    '<ellipse cx="180" cy="180" rx="150" ry="64" stroke="#6f8cb5" stroke-width="1" opacity=".42" transform="rotate(-28 180 180)"/>'+
+    '<circle class="twinkle" cx="300" cy="118" r="3" fill="#aec4e6"/>'+
+    '<circle cx="54" cy="236" r="2" fill="'+accent+'"/>'+
+    '<circle class="twinkle b" cx="150" cy="30" r="2.4" fill="#cfe0f6"/></svg>';
+
+  const override=':root{--accent:'+accent+';--accent-soft:'+soft+';--ink:'+th.ink+';--ink2:'+th.ink2+';--glow:'+th.glow+';--glow2:'+th.glow2+'}'+
+    '.logo .mono{font-family:var(--sans);font-weight:800;font-size:30px;color:'+th.ink+';letter-spacing:-.03em;display:grid;place-items:center;height:56px}';
+
+  const body=
+  '<main>'+
+    '<div class="masthead"><span class="mark">'+esc(d.monogram||'MU')+'<i></i></span><span class="tagline">'+esc(t.tag)+'</span></div>'+
+    '<article class="card">'+
+      '<header class="identity"><span class="accent-line"></span>'+orbit+
+        '<div class="brand"><span class="logo">'+logo+'</span>'+
+          '<p class="institute"><b>'+esc(d.inst1||'')+'</b>'+inst2+'</p></div>'+
+        '<div class="name">'+eyebrow+'<h1>'+first+last+'<span class="period">.</span></h1>'+
+          (d.title?'<p class="title">'+esc(d.title)+'</p>':'')+group+'</div>'+
+        coords+
+      '</header>'+
+      '<section class="contact" aria-label="contact">'+save+'<div class="links">'+rows+'</div>'+share+'</section>'+
+    '</article>'+
+    '<footer><span class="nm">'+esc(full)+'</span><span class="st">'+esc(t.foot)+'</span></footer>'+
+  '</main>'+
+  (d.cardurl?'<div class="toast" id="toast" role="status"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m20 6-11 11-5-5"/></svg><span id="toastmsg">'+esc(t.copied)+'</span></div>':'')+
+  dialog;
+
+  const js=
+    '(function(){'+
+    'var tg=document.getElementById("toast"),tm=document.getElementById("toastmsg"),tt;'+
+    'function pop(m){if(!tg)return;tm.textContent=m;tg.classList.add("show");clearTimeout(tt);tt=setTimeout(function(){tg.classList.remove("show")},1900)}'+
+    'document.querySelectorAll(".cp").forEach(function(b){b.addEventListener("click",function(e){e.preventDefault();navigator.clipboard.writeText(b.dataset.copy).then(function(){pop("'+t.copied+'")}).catch(function(){pop(b.dataset.copy)})})});'+
+    'var d=document.getElementById("qrDialog");'+
+    'if(d){document.getElementById("showQR").addEventListener("click",function(){d.showModal()});'+
+    'd.querySelector(".d-close").addEventListener("click",function(){d.close()});'+
+    'd.addEventListener("click",function(e){if(e.target===d){var r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close()}});'+
+    'var cp=document.getElementById("copy");if(cp)cp.addEventListener("click",function(){var u="'+(d.cardurl?esc(d.cardurl):'')+'";navigator.clipboard.writeText(u).then(function(){document.getElementById("status").textContent="'+t.linkCopied+'.";pop("'+t.linkCopied+'")}).catch(function(){document.getElementById("status").textContent=u})});}'+
+    '})();';
+
+  return '<!doctype html>\n<html lang="'+(d.lang==='tr'?'tr':'en')+'"><head><meta charset="utf-8">'+
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+    '<title>'+esc(full)+(d.inst1?' · '+esc(d.inst1):'')+'</title>'+
+    '<meta name="description" content="'+esc(full+(d.title?' — '+d.title:''))+'">'+
+    '<meta name="theme-color" content="'+th.ink+'">'+
+    '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'+
+    '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">'+
+    '<style>'+CARD_CSS+'\n'+override+'</style></head><body>'+
+    body+'<scr'+'ipt>'+js+'</scr'+'ipt></body></html>';
+}
+
+/* ---------- preview + actions ---------- */
+let mode='mob';
+const frame=$('frame'),pv=$('pv');
+function fit(){
+  const dw=mode==='mob'?390:920;
+  frame.style.width=dw+'px';frame.style.height='1600px';frame.style.transform='none';
+  let dh=mode==='mob'?780:560;
+  try{const m=frame.contentDocument&&frame.contentDocument.querySelector('main');if(m)dh=Math.ceil(m.getBoundingClientRect().height)+2;}catch(e){}
+  frame.style.height=dh+'px';
+  const s=pv.clientWidth/dw;frame.style.transform='scale('+s+')';pv.style.height=Math.round(dh*s)+'px';
+}
+let tmr;
+function render(){clearTimeout(tmr);tmr=setTimeout(function(){
+  try{frame.srcdoc=buildCard(readData());}catch(e){console.error(e);}
+},180);}
+frame.addEventListener('load',function(){fit();setTimeout(fit,500);});
+addEventListener('resize',fit);
+
+function setMode(m){mode=m;$('mMob').setAttribute('aria-pressed',m==='mob');$('mDesk').setAttribute('aria-pressed',m==='desk');fit();}
+$('mMob').onclick=()=>setMode('mob');$('mDesk').onclick=()=>setMode('desk');
+
+// swatches
+const sw=$('swatches');
+SWATCHES.forEach(c=>{const b=document.createElement('button');b.type='button';b.style.background=c;b.title=c;
+  b.onclick=()=>{$('accent').value=c;syncSwatch();render();};sw.appendChild(b);});
+function syncSwatch(){[...sw.children].forEach(b=>b.setAttribute('aria-pressed',b.style.backgroundColor&&rgb2hex(b.style.backgroundColor)===$('accent').value.toLowerCase()));}
+function rgb2hex(s){const m=s.match(/\d+/g);return m?'#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join(''):s;}
+
+// logo upload
+$('logobtn').onclick=()=>$('logo').click();
+$('logo').onchange=e=>{const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=()=>{
+    const img=new Image();img.onload=()=>{
+      const max=180,sc=Math.min(1,max/Math.max(img.width,img.height));
+      const w=Math.round(img.width*sc),h=Math.round(img.height*sc);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      try{logoDataUri=c.toDataURL('image/png');}catch(_){logoDataUri=rd.result;}
+      const p=$('logoprev');p.src=logoDataUri;p.style.display='block';$('logoclear').style.display='inline';$('logohint').textContent=f.name;
+      render();
+    };img.onerror=()=>{logoDataUri=rd.result;const p=$('logoprev');p.src=logoDataUri;p.style.display='block';$('logoclear').style.display='inline';render();};
+    img.src=rd.result;
+  };rd.readAsDataURL(f);
+};
+$('logoclear').onclick=()=>{logoDataUri='';$('logo').value='';$('logoprev').style.display='none';$('logoclear').style.display='none';$('logohint').textContent='PNG / JPG / SVG · otomatik küçültülür';render();};
+
+// download + copy
+function fname(){const d=readData();return ((d.first||'')+'-'+(d.last||'')).trim().replace(/^-|-$/g,'')||'kartvizit';}
+$('download').onclick=()=>{
+  const html=buildCard(readData());
+  const blob=new Blob([html],{type:'text/html'});const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='index.html';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  flash('index.html indirildi ✓');
+};
+$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(buildCard(readData()));flash('HTML panoya kopyalandı ✓');}catch(e){flash('Kopyalanamadı',true);}};
+function flash(m,err){const s=$('status');s.textContent=m;s.style.color=err?'#d8324b':'var(--ok)';clearTimeout(flash._t);flash._t=setTimeout(()=>s.textContent='',2600);}
+
+// live update on any input
+$('form').addEventListener('input',render);
+$('form').addEventListener('change',e=>{if(e.target.id==='accent')syncSwatch();render();});
+
+// init
+syncSwatch();render();
+</script>
+</body></html>
